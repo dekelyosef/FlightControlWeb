@@ -23,7 +23,7 @@ namespace FlightControlWeb.Controllers
         }
 
         // GET: api/FlightPlan/5
-        [HttpGet("{id}", Name = "Get")]
+        //[HttpGet("{id}", Name = "Get")]
         public FlightPlan Get(string id)
         {
             return flightPlansManager.GetFlight(id);

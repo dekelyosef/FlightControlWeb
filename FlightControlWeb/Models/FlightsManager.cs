@@ -9,9 +9,9 @@ namespace FlightControlWeb.Models
     {
         private static readonly List<Flight> flightsList = new List<Flight>()
         {
-            new Flight { Id = "dekel", CompanyName = "ElAl", Passengers = 230, Latitude = 34.12,
+            new Flight { Id = "ABCD1234", CompanyName = "ElAl", Passengers = 230, Latitude = 34.12,
                 Longitude = 37.244, DateTime = "2020-12-26T23:56:21Z", External = false },
-            new Flight { Id = "sarai", CompanyName = "SwissAir", Passengers = 216, Latitude = 31.12,
+            new Flight { Id = "EFGH6789", CompanyName = "SwissAir", Passengers = 216, Latitude = 31.12,
                 Longitude = 33.244, DateTime = "2020-12-27T23:00:21Z", External = false }
         };
 
