@@ -5,7 +5,7 @@ using System.Web;
 
 namespace FlightControlWeb.Models
 {
-    public class FlightsManager : IFlightsManager<Flight>
+    public class FlightsManager : IObjectsManager<Flight>
     {
         private static readonly List<Flight> flightsList = new List<Flight>()
         {
@@ -15,12 +15,12 @@ namespace FlightControlWeb.Models
                 Longitude = 33.244, DateTime = "2020-12-27T23:00:21Z", External = false }
         };
 
-        public void AddFlight(Flight flight)
+        public void AddObject(Flight flight)
         {
             flightsList.Add(flight);
         }
 
-        public void DeleteFlight(string id)
+        public void DeleteObject(string id)
         {
             Flight flight = flightsList.Where(x => x.Id == id).FirstOrDefault();
             if (flight == null)
@@ -30,12 +30,12 @@ namespace FlightControlWeb.Models
             flightsList.Remove(flight);
         }
 
-        public IEnumerable<Flight> GetAllFlights()
+        public IEnumerable<Flight> GetAllObjects()
         {
             return flightsList;
         }
 
-        public Flight GetFlight(string id)
+        public Flight GetObject(string id)
         {
             Flight flight = flightsList.Where(x => x.Id == id).FirstOrDefault();
             if (flight == null)
@@ -45,19 +45,19 @@ namespace FlightControlWeb.Models
             return flight;
         }
 
-        public void UpdateFlight(Flight flight)
+        public void UpdateObject(Flight newFlight)
         {
-            Flight newFlight = flightsList.Where(x => x.Id == flight.Id).FirstOrDefault();
-            if (newFlight == null)
+            Flight flight = flightsList.Where(x => x.Id == newFlight.Id).FirstOrDefault();
+            if (flight == null)
             {
                 throw new Exception("Flight not found");
             }
-            newFlight.CompanyName = flight.CompanyName;
-            newFlight.Passengers = flight.Passengers;
-            newFlight.Latitude = flight.Latitude;
-            newFlight.Longitude = flight.Longitude;
-            newFlight.DateTime = flight.DateTime;
-            newFlight.External = flight.External;
+            flight.CompanyName = newFlight.CompanyName;
+            flight.Passengers = newFlight.Passengers;
+            flight.Latitude = newFlight.Latitude;
+            flight.Longitude = newFlight.Longitude;
+            flight.DateTime = newFlight.DateTime;
+            flight.External = newFlight.External;
         }
     }
 }

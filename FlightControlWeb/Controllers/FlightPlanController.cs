@@ -12,36 +12,35 @@ namespace FlightControlWeb.Controllers
     [ApiController]
     public class FlightPlanController : ControllerBase
     {
-        private readonly IFlightsManager<FlightPlan> flightPlansManager =
+        private readonly IObjectsManager<FlightPlan> flightPlansManager =
             new FlightPlansManager();
 
         // GET: api/FlightPlan
         [HttpGet]
         public IEnumerable<FlightPlan> Get()
         {
-            return flightPlansManager.GetAllFlights();
+            return flightPlansManager.GetAllObjects();
         }
 
         // GET: api/FlightPlan/5
         //[HttpGet("{id}", Name = "Get")]
         public FlightPlan Get(string id)
         {
-            return flightPlansManager.GetFlight(id);
+            return flightPlansManager.GetObject(id);
         }
 
         // POST: api/FlightPlan
         [HttpPost]
         public void Post(FlightPlan flightPlan)
         {
-            // flightPlansManager.GetFlight(flightPlan);
-            flightPlansManager.AddFlight(flightPlan);
+            flightPlansManager.AddObject(flightPlan);
         }
 
         // DELETE: api/FlightPlan/5
         [HttpDelete("{id}")]
         public void Delete(string id)
         {
-            flightPlansManager.DeleteFlight(id);
+            flightPlansManager.DeleteObject(id);
         }
     }
 }

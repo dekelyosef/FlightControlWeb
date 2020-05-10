@@ -12,27 +12,27 @@ namespace FlightControlWeb.Controllers
     [ApiController]
     public class FlightsController : ControllerBase
     {
-        private readonly IFlightsManager<Flight> flightsManager = new FlightsManager();
+        private readonly IObjectsManager<Flight> flightsManager = new FlightsManager();
 
         // GET: api/Flights
         [HttpGet]
         public IEnumerable<Flight> Get()
         {
-            return flightsManager.GetAllFlights();
+            return flightsManager.GetAllObjects();
         }
 
         // GET: api/Flights/5
        // [HttpGet("{id}", Name = "Get")]
         public Flight Get(string id)
         {
-            return flightsManager.GetFlight(id);
+            return flightsManager.GetObject(id);
         }
 
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
         public void Delete(string id)
         {
-            flightsManager.DeleteFlight(id);
+            flightsManager.DeleteObject(id);
         }
     }
 }

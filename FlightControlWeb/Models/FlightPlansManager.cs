@@ -6,20 +6,20 @@ using FlightControlWeb.Data;
 
 namespace FlightControlWeb.Models
 {
-    public class FlightPlansManager : IFlightsManager<FlightPlan>
+    public class FlightPlansManager : IObjectsManager<FlightPlan>
     {
         private static readonly List<FlightPlan> flightPlansList = new List<FlightPlan>()
         {
             new FlightPlan { }
         };
 
-        public void AddFlight(FlightPlan flightPlan)
+        public void AddObject(FlightPlan flightPlan)
         {
             flightPlan.Id = Id.GetRandomId();
             flightPlansList.Add(flightPlan);
         }
 
-        public void DeleteFlight(string id)
+        public void DeleteObject(string id)
         {
             FlightPlan flightPlan = flightPlansList.Where(x => x.Id == id).FirstOrDefault();
             if (flightPlan == null)
@@ -29,12 +29,12 @@ namespace FlightControlWeb.Models
             flightPlansList.Remove(flightPlan);
         }
 
-        public IEnumerable<FlightPlan> GetAllFlights()
+        public IEnumerable<FlightPlan> GetAllObjects()
         {
             return flightPlansList;
         }
 
-        public FlightPlan GetFlight(string id)
+        public FlightPlan GetObject(string id)
         {
             FlightPlan flightPlan = flightPlansList.Where(x => x.Id == id).FirstOrDefault();
             if (flightPlan == null)
@@ -44,21 +44,21 @@ namespace FlightControlWeb.Models
             return flightPlan;
         }
 
-        public void UpdateFlight(FlightPlan flightPlan)
+        public void UpdateObject(FlightPlan newFlightPlan)
         {
-            FlightPlan newFlight = flightPlansList.Where(x => x.Id == flightPlan.Id).FirstOrDefault();
-            if (newFlight == null)
+            FlightPlan flightPlan = flightPlansList.Where(x => x.Id == newFlightPlan.Id).FirstOrDefault();
+            if (flightPlan == null)
             {
                 throw new Exception("FlightPlan not found");
             }
-            newFlight.Passengers = flightPlan.Passengers;
-            newFlight.CompanyName = flightPlan.CompanyName;
+            flightPlan.Passengers = newFlightPlan.Passengers;
+            flightPlan.CompanyName = newFlightPlan.CompanyName;
             // initial location
-            newFlight.Latitude = flightPlan.Latitude;
-            newFlight.Longitude = flightPlan.Longitude;
-            newFlight.DateTime = flightPlan.DateTime;
+            flightPlan.Latitude = newFlightPlan.Latitude;
+            flightPlan.Longitude = newFlightPlan.Longitude;
+            flightPlan.DateTime = newFlightPlan.DateTime;
             // path
-            newFlight.Segments = flightPlan.Segments;
+            flightPlan.Segments = newFlightPlan.Segments;
         }
     }
 }
