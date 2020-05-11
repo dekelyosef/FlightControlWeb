@@ -15,7 +15,7 @@ namespace FlightControlWeb.Models
 
         public void AddObject(FlightPlan flightPlan)
         {
-            flightPlan.Id = Id.GetRandomId();
+            flightPlan.Id = FlightId.GetRandomId();
             flightPlansList.Add(flightPlan);
         }
 

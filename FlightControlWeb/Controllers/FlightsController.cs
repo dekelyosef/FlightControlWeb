@@ -13,19 +13,28 @@ namespace FlightControlWeb.Controllers
     public class FlightsController : ControllerBase
     {
         private readonly IObjectsManager<Flight> flightsManager = new FlightsManager();
+        private FlightsManager manager;
 
         // GET: api/Flights
         [HttpGet]
-        public IEnumerable<Flight> Get()
+        public IEnumerable<Flight> Get(string relativeTo)
         {
-            return flightsManager.GetAllObjects();
-        }
-
-        // GET: api/Flights/5
-       // [HttpGet("{id}", Name = "Get")]
-        public Flight Get(string id)
-        {
-            return flightsManager.GetObject(id);
+            string request = Request.QueryString.Value;
+            bool notOnlyInternal = request.Contains("sync_all");
+            IEnumerable<Flight> allActiveFlights = manager.GetActiveFlights(relativeTo);
+            if (notOnlyInternal)
+            {
+                return allActiveFlights;
+            }
+            List<Flight> internalFlights = new List<Flight>();
+            foreach (Flight flight in allActiveFlights)
+            {
+                if (!flight.External)
+                {
+                    internalFlights.Add(flight);
+                }
+            }
+            return internalFlights;
         }
 
         // DELETE: api/ApiWithActions/5

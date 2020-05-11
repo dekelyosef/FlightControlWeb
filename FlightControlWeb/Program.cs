@@ -16,6 +16,7 @@ namespace FlightControlWeb
             CreateHostBuilder(args).Build().Run();
         }
 
+        // default configuration for our server
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>

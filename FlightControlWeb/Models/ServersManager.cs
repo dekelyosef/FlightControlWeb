@@ -9,7 +9,7 @@ namespace FlightControlWeb.Models
     {
         private static readonly List<Server> serversList = new List<Server>()
         {
-            new Server { Id = "1", URL = "www.server.com" }
+            new Server { ServerId = "1", URL = "www.server.com" }
         };
 
 
@@ -20,7 +20,7 @@ namespace FlightControlWeb.Models
 
         public void DeleteObject(string id)
         {
-            Server server = serversList.Where(x => x.Id == id).FirstOrDefault();
+            Server server = serversList.Where(x => x.ServerId == id).FirstOrDefault();
             if (server == null)
             {
                 throw new Exception("Server not found");
@@ -35,7 +35,7 @@ namespace FlightControlWeb.Models
 
         public Server GetObject(string id)
         {
-            Server server = serversList.Where(x => x.Id == id).FirstOrDefault();
+            Server server = serversList.Where(x => x.ServerId == id).FirstOrDefault();
             if (server == null)
             {
                 throw new Exception("Server not found");
@@ -45,12 +45,12 @@ namespace FlightControlWeb.Models
 
         public void UpdateObject(Server newServer)
         {
-            Server server = serversList.Where(x => x.Id == newServer.Id).FirstOrDefault();
+            Server server = serversList.Where(x => x.ServerId == newServer.ServerId).FirstOrDefault();
             if (server == null)
             {
                 throw new Exception("Server not found");
             }
-            server.Id = newServer.Id;
+            server.ServerId = newServer.ServerId;
             server.URL = newServer.URL;
         }
     }
