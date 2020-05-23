@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 using FlightControlWeb.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using FlightControlWeb.Data;
 
 namespace FlightControlWeb.Controllers
 {
@@ -12,35 +15,80 @@ namespace FlightControlWeb.Controllers
     [ApiController]
     public class FlightPlanController : ControllerBase
     {
-        private readonly IObjectsManager<FlightPlan> flightPlansManager =
-            new FlightPlansManager();
+        private readonly FlightsDbContext context;
+
+
+        /**
+         * Constructor
+         **/
+        public FlightPlanController(FlightsDbContext c)
+        {
+            this.context = c;
+        }
+
 
         // GET: api/FlightPlan
         [HttpGet]
-        public IEnumerable<FlightPlan> Get()
+        public async Task<ActionResult<IEnumerable<FlightPlan>>> GetFlightPlans()
         {
-            return flightPlansManager.GetAllObjects();
+            return await context.FlightPlans.Include(x => x.InitialLocation)
+                .Include(x => x.Segments).ToListAsync();
         }
 
+
         // GET: api/FlightPlan/5
-        //[HttpGet("{id}", Name = "Get")]
-        public FlightPlan Get(string id)
+        [HttpGet("{id}", Name = "Get")]
+        public async Task<ActionResult<FlightPlan>> GetFlightPlan(string id)
         {
-            return flightPlansManager.GetObject(id);
+            List<Segment> segments = new List<Segment>();
+            var flightPlan = await context.FlightPlans.Include(x => x.InitialLocation)
+                .Include(x => x.Segments).Where(x => String.Equals(id, x.Id)).FirstOrDefaultAsync();
+            if (flightPlan != null)
+            {
+                return flightPlan;
+            }
+            try
+            {
+                var server = context.externalServersFlights[id];
+                if (server == null)
+                {
+                    return NotFound();
+                }
+                string path = server.ServerURL + "api/FlightPlan/" + id;
+                flightPlan = FlightPlansManager.GetExternalFlightPlans<FlightPlan>(path);
+                if (flightPlan == null)
+                {
+                    return NotFound();
+                }
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            return flightPlan;
         }
+
 
         // POST: api/FlightPlan
         [HttpPost]
-        public void Post(FlightPlan flightPlan)
+        public async Task<ActionResult<FlightPlan>> PostFlightPlan(FlightPlan flightPlan)
         {
-            flightPlansManager.AddObject(flightPlan);
-        }
-
-        // DELETE: api/FlightPlan/5
-        [HttpDelete("{id}")]
-        public void Delete(string id)
-        {
-            flightPlansManager.DeleteObject(id);
+            flightPlan.Id = Data.FlightId.GetRandomId();
+            flightPlan.InitialLocation.Id = flightPlan.Id;
+            foreach (var segment in flightPlan.Segments)
+            {
+                segment.Id = flightPlan.Id;
+            }
+            context.FlightPlans.Add(flightPlan);
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                throw;
+            }
+            return await context.FlightPlans.FindAsync(flightPlan.Id);
         }
     }
 }

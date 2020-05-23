@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FlightControlWeb.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FlightControlWeb.Controllers
 {
@@ -12,36 +13,69 @@ namespace FlightControlWeb.Controllers
     [ApiController]
     public class ServersController : ControllerBase
     {
+        private readonly FlightsDbContext context;
 
-        private readonly IObjectsManager<Server> serversManager = new ServersManager();
+
+        /**
+         * Constructor
+         **/
+        public ServersController(FlightsDbContext c)
+        {
+            context = c;
+        }
+
 
         // GET: api/Servers
         [HttpGet]
-        public IEnumerable<Server> Get()
+        public async Task<ActionResult<IEnumerable<Server>>> GetServers()
         {
-            return serversManager.GetAllObjects();
+           return await context.Servers.ToListAsync();
         }
 
-        // GET: api/Servers/5
-        [HttpGet("{id}", Name = "Get")]
-        public Server Get(string id)
-        {
-            return serversManager.GetObject(id);
-        }
 
         // POST: api/Servers
         [HttpPost]
-        //public void Post([FromBody] string value)
-        public void Post(Server server)
+        public async Task<ActionResult<Server>> PostServer(Server server)
         {
-            serversManager.AddObject(server);
+            context.Servers.Add(server);
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                if (context.Servers.Any(e => e.ServerId == server.ServerId))
+                {
+                    return Conflict();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return await context.Servers.FindAsync(server.ServerId);
         }
+
 
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
-        public void Delete(string id)
+        public async Task<ActionResult<Server>> DeleteServer(string id)
         {
-            serversManager.DeleteObject(id);
+            var server = await context.Servers.FindAsync(id);
+            if (server == null)
+            {
+                return NotFound();
+            }
+            context.Servers.Remove(server);
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                throw;
+            }
+            return server;
         }
     }
 }

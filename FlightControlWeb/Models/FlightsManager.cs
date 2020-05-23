@@ -1,95 +1,223 @@
-﻿using System;
+﻿using FlightControlWeb.Data;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Web;
 
 namespace FlightControlWeb.Models
 {
-    public class FlightsManager : IObjectsManager<Flight>
+    public class FlightsManager : ControllerBase
     {
-        private static readonly List<Flight> flightsList = new List<Flight>()
-        {
-            new Flight { Id = "ABCD1234", CompanyName = "ElAl", Passengers = 230, Latitude = 34.12,
-                Longitude = 37.244, DateTime = "2020-12-26T23:56:21Z", IsExternal = false },
-            new Flight { Id = "EFGH6789", CompanyName = "SwissAir", Passengers = 216, Latitude = 31.12,
-                Longitude = 33.244, DateTime = "2020-12-27T23:00:21Z", IsExternal = false }
-        };
-
+        /**
+         * Constructor
+         **/
         public FlightsManager() { }
 
-        public void AddObject(Flight flight)
-        {
-            flightsList.Add(flight);
-        }
 
-        public void DeleteObject(string id)
+        /**
+         * Get all present flights
+         **/
+        public static List<Flight> GetPresentFlights(List<FlightPlan> flightPlansList,
+            DateTime relativeTo)
         {
-            Flight flight = flightsList.Where(x => x.Id == id).FirstOrDefault();
-            if (flight == null)
+            // new list
+            List<Flight> presentFlights = new List<Flight>();
+            foreach (var flightPlan in flightPlansList)
             {
-                throw new Exception("Flight not found");
-            }
-            flightsList.Remove(flight);
-        }
-
-        public IEnumerable<Flight> GetAllObjects()
-        {
-            return flightsList;
-        }
-
-        public Flight GetObject(string id)
-        {
-            Flight flight = flightsList.Where(x => x.Id == id).FirstOrDefault();
-            if (flight == null)
-            {
-                throw new Exception("Flight not found");
-            }
-            return flight;
-        }
-
-        public void UpdateObject(Flight newFlight)
-        {
-            Flight flight = flightsList.Where(x => x.Id == newFlight.Id).FirstOrDefault();
-            if (flight == null)
-            {
-                throw new Exception("Flight not found");
-            }
-            flight.CompanyName = newFlight.CompanyName;
-            flight.Passengers = newFlight.Passengers;
-            flight.Latitude = newFlight.Latitude;
-            flight.Longitude = newFlight.Longitude;
-            flight.DateTime = newFlight.DateTime;
-            flight.IsExternal = newFlight.IsExternal;
-        }
-
-        public List<Flight> GetActiveFlights(string relativeTo)
-        {
-            DateTime relateTime = getDateTime(relativeTo);
-            List<Flight> activeFlights = new List<Flight>();
-
-            foreach (Flight flight in flightsList)
-            {
-                DateTime flightTime = getDateTime(relativeTo);
-                if (DateTime.Compare(relateTime, flightTime) <= 0)
+                // convert the given current time to UTC
+                DateTime time = TimeZoneInfo.ConvertTimeToUtc(relativeTo);
+                // checks if the flight happening now acording to the given time
+                if (IsActive(flightPlan, time))
                 {
-                    activeFlights.Add(flight);
+                    Flight flight = new Flight(flightPlan);
+                    // update the new location according to the time that pass
+                    Tuple<double, double> newLocation = GetFlightLocation(flightPlan, time);
+                    flight.Longitude = newLocation.Item1;
+                    flight.Latitude = newLocation.Item2;
+                    // add the flight to the present active fligts list
+                    presentFlights.Add(flight);
                 }
             }
-            return activeFlights;
+            return presentFlights;
         }
 
-        public DateTime getDateTime(string relativeTo)
-        {
-            int year, mounth, day, hour, minute, second;
-            // convert to dateTime
-            year = Int32.Parse(relativeTo.Substring(0, 4));
-            mounth = Int32.Parse(relativeTo.Substring(5, 2));
-            day = Int32.Parse(relativeTo.Substring(8, 2));
-            hour = Int32.Parse(relativeTo.Substring(11, 2));
-            minute = Int32.Parse(relativeTo.Substring(14, 2));
-            second = Int32.Parse(relativeTo.Substring(17, 2));
 
-            return new DateTime(year, mounth, day, hour, minute, second);
+        /**
+         * Checks if flight is happening at the given time
+         **/
+        public static bool IsActive(FlightPlan flightPlan, DateTime time)
+        {
+            // if the departure didn't happen yet
+            if (flightPlan.InitialLocation.DateTime.Ticks > time.Ticks)
+            {
+                return false;
+            }
+            else
+            {
+                double segmentsTime = 0;
+                // calculate all the segments timespan of the flight
+                foreach (var segment in flightPlan.Segments)
+                {
+                    segmentsTime += segment.TimespanSeconds;
+                }
+                // calculate the time of landing
+                DateTime totalFlightTime =
+                    flightPlan.InitialLocation.DateTime.AddSeconds(segmentsTime);
+                // return true if the flight hasn't landed yet
+                if (DateTime.Compare(totalFlightTime, time) > 0)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+
+        /**
+         * Get updated flight location
+         **/
+        public static Tuple<double, double> GetFlightLocation(FlightPlan flightPlan, DateTime time)
+        {
+            var currentFlightTime = time.Ticks - flightPlan.InitialLocation.DateTime.Ticks;
+            var totalTime = TimeSpan.FromTicks(currentFlightTime).TotalSeconds;
+            // calculates the seconds until arriving to current segment
+            int index = CurrentSegmentIndex(flightPlan.Segments, totalTime);
+            // get the initial location time
+            DateTime timeFromTakeOff = flightPlan.InitialLocation.DateTime;
+            for (int iter = 0; iter <= index; iter++)
+            {
+                // update the initial location time
+                timeFromTakeOff =
+                    timeFromTakeOff.AddSeconds(flightPlan.Segments[iter].TimespanSeconds);
+            }
+            var difference = time.Ticks - timeFromTakeOff.Ticks;
+            var distance = TimeSpan.FromTicks(difference).TotalSeconds;
+            return GetLocation(flightPlan, index, distance);
+        }
+
+
+        /**
+         * Get the current segment according to the current flight time
+         **/
+        public static int CurrentSegmentIndex(List<Segment> segmentsList, double time)
+        {
+            int index = 0;
+            foreach (Segment segment in segmentsList)
+            {
+                // checks if flight time is greater than the segment's timespan seconds
+                if (time > segment.TimespanSeconds)
+                {
+                    // reduce segment's timespan seconds from flight time
+                    time -= segment.TimespanSeconds;
+                }
+                else
+                {
+                    return index;
+                }
+                index++;
+            }
+            // in case of error return -1
+            return -1;
+        }
+
+
+        /**
+         * Get the current flight location using linear interpolation
+         **/
+        public static Tuple<double, double> GetLocation(FlightPlan flightPlan,
+            int index, double distance)
+        {
+            Segment currentSegment;
+            if (index == 0)
+            {
+                // initialize the first segment
+                currentSegment = new Segment(flightPlan.Id, flightPlan.InitialLocation.Latitude,
+                    flightPlan.InitialLocation.Longitude, 0);
+            }
+            else
+            {
+                currentSegment = flightPlan.Segments[index - 1];
+            }
+            var nextSegment = flightPlan.Segments[index];
+            var time = distance / nextSegment.TimespanSeconds;
+            var x = LinearInterpolation(currentSegment.Longitude, currentSegment.Latitude, time);
+            var y = LinearInterpolation(nextSegment.Longitude, nextSegment.Latitude, time);
+            // return the updated location
+            return Tuple.Create(x, y);
+        }
+
+
+        /**
+         * Linear interpolation
+         **/
+        public static double LinearInterpolation(double var0, double var1, double time)
+        {
+            return var0 + ((var1 - var0) / time);
+        }
+
+
+        /**
+         * Get all active external flights
+         **/
+        public static List<Flight> GetExternalFlights(DateTime time, string path)
+        {
+            // get the active flights from the current connected server
+            string request =
+                path + "api/Flights/?relative_to=" + time.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            // get the json string
+            string jsonStr = GetFlightJson(String.Format(request));
+            if (jsonStr == null)
+            {
+                return default;
+            }
+            return GetFlightsFromExternalServer(jsonStr);
+        }
+
+
+        /**
+         * Get all active external flights json
+         **/
+        public static List<Flight> GetFlightsFromExternalServer(string jsonStr)
+        {
+            // handle differences
+            var dezerializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new DefaultContractResolver
+                {
+                    NamingStrategy = new SnakeCaseNamingStrategy()
+                }
+            };
+            return JsonConvert.DeserializeObject<List<Flight>>(jsonStr, dezerializerSettings);
+        }
+
+
+        /**
+         * Get json from given URL path
+         **/
+        public static string GetFlightJson(string serverPath)
+        {
+            string jsonStr = "";
+            WebRequest request = WebRequest.Create(String.Format(serverPath));
+            request.Method = "GET";
+            // gets a response from the external server
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            // creates a stream object from external API response
+            using (Stream stream = response.GetResponseStream())
+            {
+                StreamReader reader = new StreamReader(stream);
+                jsonStr = reader.ReadToEnd();
+                reader.Close();
+            }
+            if (jsonStr == "")
+            {
+                return null;
+            }
+            return jsonStr;
         }
     }
 }

@@ -1,64 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using System.Linq;
 using System.Web;
 using FlightControlWeb.Data;
+using Microsoft.AspNetCore.Mvc;
+using System.Net;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace FlightControlWeb.Models
 {
-    public class FlightPlansManager : IObjectsManager<FlightPlan>
+    public class FlightPlansManager : ControllerBase
     {
-        private static readonly List<FlightPlan> flightPlansList = new List<FlightPlan>()
-        {
-            new FlightPlan { }
-        };
+        /**
+         * Constructor
+         **/
+        public FlightPlansManager() { }
 
-        public void AddObject(FlightPlan flightPlan)
-        {
-            flightPlan.Id = FlightId.GetRandomId();
-            flightPlansList.Add(flightPlan);
-        }
 
-        public void DeleteObject(string id)
+        /**
+         * Get external flightPlans
+         **/
+        public static T GetExternalFlightPlans<T>(string url)
         {
-            FlightPlan flightPlan = flightPlansList.Where(x => x.Id == id).FirstOrDefault();
-            if (flightPlan == null)
+            string data = "";
+            WebRequest request = WebRequest.Create(String.Format(url));
+            request.Method = "GET";
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            // get data
+            using (Stream stream = response.GetResponseStream())
             {
-                throw new Exception("FlightPlan not found");
+                StreamReader reader = new StreamReader(stream);
+                data = reader.ReadToEnd();
+                reader.Close();
             }
-            flightPlansList.Remove(flightPlan);
-        }
-
-        public IEnumerable<FlightPlan> GetAllObjects()
-        {
-            return flightPlansList;
-        }
-
-        public FlightPlan GetObject(string id)
-        {
-            FlightPlan flightPlan = flightPlansList.Where(x => x.Id == id).FirstOrDefault();
-            if (flightPlan == null)
+            if (data == "")
             {
-                throw new Exception("FlightPlan not found");
+                return default;
             }
-            return flightPlan;
-        }
-
-        public void UpdateObject(FlightPlan newFlightPlan)
-        {
-            FlightPlan flightPlan = flightPlansList.Where(x => x.Id == newFlightPlan.Id).FirstOrDefault();
-            if (flightPlan == null)
-            {
-                throw new Exception("FlightPlan not found");
-            }
-            flightPlan.Passengers = newFlightPlan.Passengers;
-            flightPlan.CompanyName = newFlightPlan.CompanyName;
-            // initial location
-            flightPlan.Latitude = newFlightPlan.Latitude;
-            flightPlan.Longitude = newFlightPlan.Longitude;
-            flightPlan.DateTime = newFlightPlan.DateTime;
-            // path
-            flightPlan.Segments = newFlightPlan.Segments;
+            return JsonConvert.DeserializeObject<T>(data);
         }
     }
 }

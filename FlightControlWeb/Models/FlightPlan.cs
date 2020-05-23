@@ -1,4 +1,6 @@
 ﻿using FlightControlWeb.Data;
+using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,112 +13,68 @@ namespace FlightControlWeb.Models
         string id;
         int passengers;
         string companyName;
-        // initial location
-        double longitude;
-        double latitude;
-        string dateTime;
+        InitialLocation initialLocation;
         // the all path
-        Segment[] segment;
+        List<Segment> segments;
 
-        public FlightPlan(double lon, double lat, int passengersNum, string company,
-            string time, Segment[] seg)
+
+        /**
+         * Constructor
+         **/
+        public FlightPlan() { }
+
+
+        /**
+         * Constructor with given parameters
+         **/
+        public FlightPlan(int passengersNum, string company, InitialLocation init, List<Segment> seg)
         {
             Id = FlightId.GetRandomId();
             Passengers = passengersNum;
             CompanyName = company;
-            // initial lovation
-            Longitude = lon;
-            Latitude = lat;
-            DateTime = time;
+            InitialLocation = init;
             // the all path
-            Segment = seg;
-
-            // create a new flight to this flightPlan
-            new Flight(Id, lon, lat, passengersNum, company, time, true);
+            Segments = seg;
         }
 
+
+        [System.Text.Json.Serialization.JsonIgnore]
         public string Id
         {
             get { return this.id; }
-            set
-            {
-                if (!this.id.Equals(value))
-                {
-                    this.id = value;
-                }
-            }
+            set { this.id = value; }
         }
 
+
+        [JsonPropertyName("passengers")]
         public int Passengers
         {
             get { return this.passengers; }
-            set
-            {
-                if (this.passengers != value)
-                {
-                    this.passengers = value;
-                }
-            }
+            set { this.passengers = value; }
         }
 
+
+        [JsonPropertyName("company_name")]
         public string CompanyName
         {
             get { return this.companyName; }
-            set
-            {
-                if (!this.companyName.Equals(value))
-                {
-                    this.companyName = value;
-                }
-            }
+            set { this.companyName = value; }
         }
 
-        public double Longitude
+
+        [JsonPropertyName("initial_location")]
+        public InitialLocation InitialLocation
         {
-            get { return this.longitude; }
-            set
-            {
-                if (this.longitude != value)
-                {
-                    this.longitude = value;
-                }
-            }
+            get { return this.initialLocation; }
+            set { this.initialLocation = value; }
         }
 
-        public double Latitude
-        {
-            get { return this.latitude; }
-            set
-            {
-                if (this.latitude != value)
-                {
-                    this.latitude = value;
-                }
-            }
-        }
 
-        public string DateTime
+        [JsonPropertyName("segments")]
+        public List<Segment> Segments
         {
-            get { return this.dateTime; }
-            set
-            {
-                if (!this.dateTime.Equals(value))
-                {
-                    this.dateTime = value;
-                }
-            }
-        }
-
-        public Segment[] Segment
-        {
-            get { return this.segment; }
-            set
-            {
-                if (this.segment != value)
-                {
-                    this.segment = value;
-                }
-            }
+            get { return this.segments; }
+            set { this.segments = value; }
         }
     }
 }

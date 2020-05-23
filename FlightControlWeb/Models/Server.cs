@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace FlightControlWeb.Models
@@ -8,38 +10,38 @@ namespace FlightControlWeb.Models
     public class Server
     {
         string serverId;
-        string uRL;
+        string serverURL;
 
+
+        /**
+         * Constructor
+         **/
         public Server() { }
 
-        public Server(string id, string uRLStr)
+
+        /**
+         * Constructor with given parameters
+         **/
+        public Server(string id, string uRL)
         {
             ServerId = id;
-            URL = uRLStr;
+            ServerURL = uRL;
         }
 
+
+        [JsonPropertyName("ServerId")]
         public string ServerId
         {
             get { return this.serverId; }
-            set
-            {
-                if (!this.serverId.Equals(value))
-                {
-                    this.serverId = value;
-                }
-            }
+            set { this.serverId = value; }
         }
 
-        public string URL
+
+        [JsonPropertyName("ServerURL")]
+        public string ServerURL
         {
-            get { return this.uRL; }
-            set
-            {
-                if (!this.uRL.Equals(value))
-                {
-                    this.uRL = value;
-                }
-            }
+            get { return this.serverURL; }
+            set { this.serverURL = value; }
         }
     }
 }

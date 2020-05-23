@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,29 +7,28 @@ using System.Web;
 
 namespace FlightControlWeb.Data
 {
-    public class Segment
+    public class InitialLocation
     {
         string id;
         double longitude;
         double latitude;
-        double timespanSeconds;
+        DateTime dateTime;
 
 
         /**
          * Constructor
          **/
-        public Segment() { }
+        public InitialLocation() { }
 
 
         /**
          * Constructor with given parameters
          **/
-        public Segment(string flightId, double lon, double lat, double time)
+        public InitialLocation(double lon, double lat, DateTime date)
         {
-            Id = flightId;
             Longitude = lon;
             Latitude = lat;
-            TimespanSeconds = time;
+            DateTime = date;
         }
 
 
@@ -54,7 +54,7 @@ namespace FlightControlWeb.Data
         }
 
 
-        [JsonProperty("latitde")]
+        [JsonProperty("latitude")]
         public double Latitude
         {
             get { return this.latitude; }
@@ -68,17 +68,11 @@ namespace FlightControlWeb.Data
         }
 
 
-        [JsonProperty("timespan_seconds")]
-        public double TimespanSeconds
+        [JsonProperty("date_time")]
+        public DateTime DateTime
         {
-            get { return this.timespanSeconds; }
-            set
-            {
-                if (this.timespanSeconds != value)
-                {
-                    this.timespanSeconds = value;
-                }
-            }
+            get { return this.dateTime; }
+            set { this.dateTime = value; }
         }
     }
 }
