@@ -27,7 +27,7 @@ namespace FlightControlWeb.Models
         {
             // new list
             List<Flight> presentFlights = new List<Flight>();
-            foreach (var flightPlan in flightPlansList)
+            foreach (FlightPlan flightPlan in flightPlansList)
             {
                 // convert the given current time to UTC
                 DateTime time = TimeZoneInfo.ConvertTimeToUtc(relativeTo);
@@ -61,7 +61,7 @@ namespace FlightControlWeb.Models
             {
                 double segmentsTime = 0;
                 // calculate all the segments timespan of the flight
-                foreach (var segment in flightPlan.Segments)
+                foreach (Segment segment in flightPlan.Segments)
                 {
                     segmentsTime += segment.TimespanSeconds;
                 }
@@ -83,21 +83,20 @@ namespace FlightControlWeb.Models
          **/
         public static Tuple<double, double> GetFlightLocation(FlightPlan flightPlan, DateTime time)
         {
-            var currentFlightTime = time.Ticks - flightPlan.InitialLocation.DateTime.Ticks;
-            var totalTime = TimeSpan.FromTicks(currentFlightTime).TotalSeconds;
+            double totalTime = (time - flightPlan.InitialLocation.DateTime).TotalSeconds;
             // calculates the seconds until arriving to current segment
             int index = CurrentSegmentIndex(flightPlan.Segments, totalTime);
             // get the initial location time
             DateTime timeFromTakeOff = flightPlan.InitialLocation.DateTime;
-            for (int iter = 0; iter <= index; iter++)
+            for (int iter = 0; iter < index; iter++)
             {
                 // update the initial location time
                 timeFromTakeOff =
                     timeFromTakeOff.AddSeconds(flightPlan.Segments[iter].TimespanSeconds);
             }
-            var difference = time.Ticks - timeFromTakeOff.Ticks;
-            var distance = TimeSpan.FromTicks(difference).TotalSeconds;
-            return GetLocation(flightPlan, index, distance);
+
+            double leftTime = (time - timeFromTakeOff).TotalSeconds;
+            return GetLocation(flightPlan, index, leftTime);
         }
 
 
@@ -130,7 +129,7 @@ namespace FlightControlWeb.Models
          * Get the current flight location using linear interpolation
          **/
         public static Tuple<double, double> GetLocation(FlightPlan flightPlan,
-            int index, double distance)
+            int index, double leftTime)
         {
             Segment currentSegment;
             if (index == 0)
@@ -143,10 +142,12 @@ namespace FlightControlWeb.Models
             {
                 currentSegment = flightPlan.Segments[index - 1];
             }
-            var nextSegment = flightPlan.Segments[index];
-            var time = distance / nextSegment.TimespanSeconds;
-            var x = LinearInterpolation(currentSegment.Longitude, currentSegment.Latitude, time);
-            var y = LinearInterpolation(nextSegment.Longitude, nextSegment.Latitude, time);
+            Segment nextSegment = flightPlan.Segments[index];
+            double partOfSegment = leftTime / nextSegment.TimespanSeconds;
+            double x = LinearInterpolation(currentSegment.Longitude,
+                currentSegment.Latitude, partOfSegment);
+            double y = LinearInterpolation(nextSegment.Longitude,
+                nextSegment.Latitude, partOfSegment);
             // return the updated location
             return Tuple.Create(x, y);
         }
@@ -155,9 +156,9 @@ namespace FlightControlWeb.Models
         /**
          * Linear interpolation
          **/
-        public static double LinearInterpolation(double var0, double var1, double time)
+        public static double LinearInterpolation(double var0, double var1, double partOfSegment)
         {
-            return var0 + ((var1 - var0) / time);
+            return ((var1 - var0) * partOfSegment) + var0;
         }
 
 
@@ -185,7 +186,7 @@ namespace FlightControlWeb.Models
         public static List<Flight> GetFlightsFromExternalServer(string jsonStr)
         {
             // handle differences
-            var dezerializerSettings = new JsonSerializerSettings
+            JsonSerializerSettings dezerializerSettings = new JsonSerializerSettings
             {
                 ContractResolver = new DefaultContractResolver
                 {
