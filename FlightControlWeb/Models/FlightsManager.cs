@@ -34,9 +34,13 @@ namespace FlightControlWeb.Models
                 // checks if the flight happening now acording to the given time
                 if (IsActive(flightPlan, time))
                 {
-                    Flight flight = new Flight(flightPlan);
                     // update the new location according to the time that pass
                     Tuple<double, double> newLocation = GetFlightLocation(flightPlan, time);
+                    if (newLocation == null)
+                    {
+                        continue;
+                    }
+                    Flight flight = new Flight(flightPlan);
                     flight.Longitude = newLocation.Item1;
                     flight.Latitude = newLocation.Item2;
                     // add the flight to the present active fligts list
@@ -81,47 +85,51 @@ namespace FlightControlWeb.Models
         /**
          * Get updated flight location
          **/
-        public static Tuple<double, double> GetFlightLocation(FlightPlan flightPlan, DateTime time)
+        public static Tuple<double, double> GetFlightLocation(FlightPlan flightPlan, DateTime currentTime)
         {
-            double totalTime = (time - flightPlan.InitialLocation.DateTime).TotalSeconds;
             // calculates the seconds until arriving to current segment
-            int index = CurrentSegmentIndex(flightPlan.Segments, totalTime);
+            int index = CurrentSegmentIndex(flightPlan, currentTime);
+            if (index == -1)
+            {
+                return null;
+            }
             // get the initial location time
             DateTime timeFromTakeOff = flightPlan.InitialLocation.DateTime;
             for (int iter = 0; iter < index; iter++)
             {
                 // update the initial location time
-                timeFromTakeOff =
-                    timeFromTakeOff.AddSeconds(flightPlan.Segments[iter].TimespanSeconds);
+                timeFromTakeOff = timeFromTakeOff.AddSeconds
+                    (flightPlan.Segments.ElementAt(index).TimespanSeconds);
             }
 
-            double leftTime = (time - timeFromTakeOff).TotalSeconds;
-            return GetLocation(flightPlan, index, leftTime);
+            return GetLocation(flightPlan, index, currentTime, timeFromTakeOff);
         }
 
 
         /**
          * Get the current segment according to the current flight time
          **/
-        public static int CurrentSegmentIndex(List<Segment> segmentsList, double time)
+        public static int CurrentSegmentIndex(FlightPlan flightPlan, DateTime currentTime)
         {
-            int index = 0;
-            foreach (Segment segment in segmentsList)
+            List<Segment> segmentsList = flightPlan.Segments;
+            DateTime takeOffTime = flightPlan.InitialLocation.DateTime;
+            int index = -1;
+            while (takeOffTime <= currentTime && (index+1) < segmentsList.Count)
             {
-                // checks if flight time is greater than the segment's timespan seconds
-                if (time > segment.TimespanSeconds)
-                {
-                    // reduce segment's timespan seconds from flight time
-                    time -= segment.TimespanSeconds;
-                }
-                else
-                {
-                    return index;
-                }
                 index++;
+                double segmentTimespan = segmentsList.ElementAt(index).TimespanSeconds;
+                takeOffTime = takeOffTime.AddSeconds(segmentTimespan);
             }
-            // in case of error return -1
-            return -1;
+            // if the flight didn't start or already finished
+            if (takeOffTime < currentTime)
+            {
+                index = -1;
+            }
+            if (flightPlan.InitialLocation.DateTime > currentTime)
+            {
+                index = -1;
+            }
+            return index;
         }
 
 
@@ -129,7 +137,7 @@ namespace FlightControlWeb.Models
          * Get the current flight location using linear interpolation
          **/
         public static Tuple<double, double> GetLocation(FlightPlan flightPlan,
-            int index, double leftTime)
+            int index, DateTime currentTime, DateTime timeFromTakeOff)
         {
             Segment currentSegment;
             if (index == 0)
@@ -140,25 +148,35 @@ namespace FlightControlWeb.Models
             }
             else
             {
-                currentSegment = flightPlan.Segments[index - 1];
+                currentSegment = flightPlan.Segments.ElementAt(index - 1);
             }
-            Segment nextSegment = flightPlan.Segments[index];
-            double partOfSegment = leftTime / nextSegment.TimespanSeconds;
-            double x = LinearInterpolation(currentSegment.Longitude,
-                currentSegment.Latitude, partOfSegment);
-            double y = LinearInterpolation(nextSegment.Longitude,
-                nextSegment.Latitude, partOfSegment);
+            // get the last position flight and the new position
+            double startLon = currentSegment.Longitude;
+            double endLon = flightPlan.Segments.ElementAt(index).Longitude;
+            double startLat = currentSegment.Latitude;
+            double endLat = flightPlan.Segments.ElementAt(index).Latitude;
+
+            double longitude = LinearInterpolation(startLon, endLon, timeFromTakeOff,
+                flightPlan.Segments.ElementAt(index).TimespanSeconds, currentTime);
+
+            double latitude = LinearInterpolation(startLat, endLat, timeFromTakeOff,
+                flightPlan.Segments.ElementAt(index).TimespanSeconds, currentTime);
+
             // return the updated location
-            return Tuple.Create(x, y);
+            return Tuple.Create(longitude, latitude);
         }
 
 
         /**
          * Linear interpolation
          **/
-        public static double LinearInterpolation(double var0, double var1, double partOfSegment)
+        public static double LinearInterpolation(double start, double end, DateTime timeFromTakeOff, double timespan, DateTime currentTime)
         {
-            return ((var1 - var0) * partOfSegment) + var0;
+            double distance = end - start;
+            double currentSeconds = currentTime.Subtract(timeFromTakeOff).TotalSeconds;
+            // find the ratio
+            double timePass = currentSeconds / timespan;
+            return (start + (timePass * distance));
         }
 
 

@@ -73,6 +73,10 @@ namespace FlightControlWeb.Controllers
         [HttpPost]
         public async Task<ActionResult<FlightPlan>> PostFlightPlan(FlightPlan flightPlan)
         {
+            if (!FlightPlansManager.IsValid(flightPlan))
+            {
+                return BadRequest("Flight plan isn't valid");
+            }
             flightPlan.Id = Data.FlightId.GetRandomId();
             flightPlan.InitialLocation.Id = flightPlan.Id;
             foreach (var segment in flightPlan.Segments)
