@@ -41,8 +41,9 @@ namespace FlightControlWeb.Controllers
         public async Task<ActionResult<FlightPlan>> GetFlightPlan(string id)
         {
             List<Segment> segments = new List<Segment>();
-            var flightPlan = await context.FlightPlans.Include(x => x.InitialLocation)
-                .Include(x => x.Segments).Where(x => String.Equals(id, x.Id)).FirstOrDefaultAsync();
+            var flightPlan =
+                await context.FlightPlans.Include(x => x.InitialLocation).Include(x => x.Segments)
+                .Where(x => String.Equals(id, x.Id)).FirstOrDefaultAsync();
             if (flightPlan != null)
             {
                 return flightPlan;

@@ -24,8 +24,9 @@ namespace FlightControlWeb.Data
         /**
          * Constructor with given parameters
          **/
-        public InitialLocation(double lon, double lat, DateTime date)
+        public InitialLocation(string id, double lon, double lat, DateTime date)
         {
+            Id = id;
             Longitude = lon;
             Latitude = lat;
             DateTime = date;

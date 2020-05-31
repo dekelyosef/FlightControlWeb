@@ -85,7 +85,8 @@ namespace FlightControlWeb.Models
         /**
          * Get updated flight location
          **/
-        public static Tuple<double, double> GetFlightLocation(FlightPlan flightPlan, DateTime currentTime)
+        public static Tuple<double, double>
+            GetFlightLocation(FlightPlan flightPlan, DateTime currentTime)
         {
             // calculates the seconds until arriving to current segment
             int index = CurrentSegmentIndex(flightPlan, currentTime);
@@ -170,7 +171,8 @@ namespace FlightControlWeb.Models
         /**
          * Linear interpolation
          **/
-        public static double LinearInterpolation(double start, double end, DateTime timeFromTakeOff, double timespan, DateTime currentTime)
+        public static double LinearInterpolation(double start, double end,
+            DateTime timeFromTakeOff, double timespan, DateTime currentTime)
         {
             double distance = end - start;
             double currentSeconds = currentTime.Subtract(timeFromTakeOff).TotalSeconds;

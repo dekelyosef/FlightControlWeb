@@ -27,7 +27,8 @@ namespace FlightControlWeb.Models
         /**
          * Constructor with given parameters
          **/
-        public FlightPlan(int passengersNum, string company, InitialLocation init, List<Segment> seg)
+        public FlightPlan(int passengersNum, string company, InitialLocation init,
+            List<Segment> seg)
         {
             Id = FlightId.GetRandomId();
             Passengers = passengersNum;
