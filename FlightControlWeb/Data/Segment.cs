@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Web;
 
 namespace FlightControlWeb.Data
@@ -41,6 +42,7 @@ namespace FlightControlWeb.Data
 
 
         [JsonProperty("longitude")]
+        [JsonPropertyName("longitude")]
         public double Longitude
         {
             get { return this.longitude; }
@@ -55,6 +57,7 @@ namespace FlightControlWeb.Data
 
 
         [JsonProperty("latitde")]
+        [JsonPropertyName("latitde")]
         public double Latitude
         {
             get { return this.latitude; }
@@ -69,6 +72,7 @@ namespace FlightControlWeb.Data
 
 
         [JsonProperty("timespan_seconds")]
+        [JsonPropertyName("timespan_seconds")]
         public double TimespanSeconds
         {
             get { return this.timespanSeconds; }

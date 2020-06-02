@@ -48,9 +48,13 @@ namespace FlightControlWeb
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+
             app.UseRouting();
+
+            app.UseDefaultFiles();
+
             app.UseStaticFiles();
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

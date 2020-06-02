@@ -29,6 +29,7 @@ namespace FlightControlWeb.Models
         }
 
 
+        [JsonProperty("ServerId")]
         [JsonPropertyName("ServerId")]
         public string ServerId
         {
@@ -37,6 +38,7 @@ namespace FlightControlWeb.Models
         }
 
 
+        [JsonProperty("ServerURL")]
         [JsonPropertyName("ServerURL")]
         public string ServerURL
         {

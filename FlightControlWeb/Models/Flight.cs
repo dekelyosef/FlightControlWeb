@@ -55,6 +55,7 @@ namespace FlightControlWeb.Models
             IsExternal = external;
         }
 
+        [JsonProperty("flight_id")]
         [JsonPropertyName("flight_id")]
         public string Id
         {
@@ -63,12 +64,14 @@ namespace FlightControlWeb.Models
         }
 
         [JsonProperty("longitude")]
+        [JsonPropertyName("longitude")]
         public double Longitude
         {
             get { return this.longitude; }
             set { this.longitude = value; }
         }
 
+        [JsonProperty("latitude")]
         [JsonPropertyName("latitude")]
         public double Latitude
         {
@@ -76,6 +79,7 @@ namespace FlightControlWeb.Models
             set { this.latitude = value; }
         }
 
+        [JsonProperty("passengers")]
         [JsonPropertyName("passengers")]
         public int Passengers
         {
@@ -84,6 +88,7 @@ namespace FlightControlWeb.Models
          
         }
 
+        [JsonProperty("company_name")]
         [JsonPropertyName("company_name")]
         public string CompanyName
         {
@@ -91,6 +96,7 @@ namespace FlightControlWeb.Models
             set { this.companyName = value; }
         }
 
+        [JsonProperty("date_time")]
         [JsonPropertyName("date_time")]
         public DateTime DateTime
         {
@@ -98,6 +104,7 @@ namespace FlightControlWeb.Models
             set { this.dateTime = value; }
         }
 
+        [JsonProperty("is_external")]
         [JsonPropertyName("is_external")]
         public bool IsExternal
         {

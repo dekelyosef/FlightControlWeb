@@ -47,6 +47,7 @@ namespace FlightControlWeb.Models
         }
 
 
+        [JsonProperty("passengers")]
         [JsonPropertyName("passengers")]
         public int Passengers
         {
@@ -55,6 +56,7 @@ namespace FlightControlWeb.Models
         }
 
 
+        [JsonProperty("company_name")]
         [JsonPropertyName("company_name")]
         public string CompanyName
         {
@@ -63,6 +65,7 @@ namespace FlightControlWeb.Models
         }
 
 
+        [JsonProperty("initial_location")]
         [JsonPropertyName("initial_location")]
         public InitialLocation InitialLocation
         {
@@ -71,6 +74,7 @@ namespace FlightControlWeb.Models
         }
 
 
+        [JsonProperty("segments")]
         [JsonPropertyName("segments")]
         public List<Segment> Segments
         {

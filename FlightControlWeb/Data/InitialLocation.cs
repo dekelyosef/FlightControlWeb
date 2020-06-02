@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using NPOI.SS.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Web;
 
 namespace FlightControlWeb.Data
@@ -42,6 +44,7 @@ namespace FlightControlWeb.Data
 
 
         [JsonProperty("longitude")]
+        [JsonPropertyName("longitude")]
         public double Longitude
         {
             get { return this.longitude; }
@@ -56,6 +59,7 @@ namespace FlightControlWeb.Data
 
 
         [JsonProperty("latitude")]
+        [JsonPropertyName("latitude")]
         public double Latitude
         {
             get { return this.latitude; }
@@ -69,7 +73,10 @@ namespace FlightControlWeb.Data
         }
 
 
+
+        [Newtonsoft.Json.JsonConverter(typeof(DateFormatConverter), "yyyy-MM-ddTHH:mm:ssZ")]
         [JsonProperty("date_time")]
+        [JsonPropertyName("date_time")]
         public DateTime DateTime
         {
             get { return this.dateTime; }
