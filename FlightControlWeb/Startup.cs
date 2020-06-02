@@ -20,7 +20,13 @@ namespace FlightControlWeb
     {
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            if (configuration != null)
+            {
+                Configuration = configuration;
+            } else
+            {
+                throw new Exception("Invalid configuration");
+            }
         }
 
         public IConfiguration Configuration { get; }
@@ -43,11 +49,8 @@ namespace FlightControlWeb
             }
 
             app.UseHttpsRedirection();
-
             app.UseRouting();
-
             app.UseStaticFiles();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
