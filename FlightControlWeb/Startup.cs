@@ -44,8 +44,8 @@ namespace FlightControlWeb
                     builder.AllowAnyHeader();
                 });
             });
-            services.AddControllers();
             services.AddDbContext<FlightsDbContext>(opt => opt.UseInMemoryDatabase("FlightsDb"));
+            services.AddControllers();
         }
 
         // This method gets called by the runtime.
