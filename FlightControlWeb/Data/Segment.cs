@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Web;
@@ -33,6 +34,7 @@ namespace FlightControlWeb.Data
         }
 
 
+        [Key]
         [System.Text.Json.Serialization.JsonIgnore]
         public string Id
         {
@@ -56,8 +58,8 @@ namespace FlightControlWeb.Data
         }
 
 
-        [JsonProperty("latitde")]
-        [JsonPropertyName("latitde")]
+        [JsonProperty("latitude")]
+        [JsonPropertyName("latitude")]
         public double Latitude
         {
             get { return this.latitude; }

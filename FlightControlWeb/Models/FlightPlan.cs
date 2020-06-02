@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.ComponentModel.DataAnnotations;
 
 namespace FlightControlWeb.Models
 {
@@ -39,6 +40,7 @@ namespace FlightControlWeb.Models
         }
 
 
+        [Key]
         [System.Text.Json.Serialization.JsonIgnore]
         public string Id
         {

@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using NPOI.SS.Util;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Web;
@@ -35,6 +36,7 @@ namespace FlightControlWeb.Data
         }
 
 
+        [Key]
         [System.Text.Json.Serialization.JsonIgnore]
         public string Id
         {
