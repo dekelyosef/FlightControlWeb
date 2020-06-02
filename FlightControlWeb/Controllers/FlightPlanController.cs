@@ -77,13 +77,14 @@ namespace FlightControlWeb.Controllers
             {
                 return BadRequest("Flight plan isn't valid");
             }
+            context.FlightPlans.Add(flightPlan);
             flightPlan.Id = Data.FlightId.GetRandomId();
-/*            flightPlan.InitialLocation.Id = flightPlan.Id;
-            foreach (var segment in flightPlan.Segments)
-            {
-                segment.Id = flightPlan.Id;
-            }
-            context.FlightPlans.Add(flightPlan);*/
+
+            /*            flightPlan.InitialLocation.Id = flightPlan.Id;
+                        foreach (var segment in flightPlan.Segments)
+                        {
+                            segment.Id = flightPlan.Id;
+                        }*/
             try
             {
                 await context.SaveChangesAsync();
