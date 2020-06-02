@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Web;
@@ -12,7 +13,7 @@ namespace FlightControlWeb.Data
         string id;
         double longitude;
         double latitude;
-        double timespanSeconds;
+        double timespan_seconds;
 
 
         /**
@@ -32,7 +33,7 @@ namespace FlightControlWeb.Data
             TimespanSeconds = time;
         }
 
-
+        [Key]
         [System.Text.Json.Serialization.JsonIgnore]
         public string Id
         {
@@ -56,8 +57,8 @@ namespace FlightControlWeb.Data
         }
 
 
-        [JsonProperty("latitde")]
-        [JsonPropertyName("latitde")]
+        [JsonProperty("latitude")]
+        [JsonPropertyName("latitude")]
         public double Latitude
         {
             get { return this.latitude; }
@@ -75,12 +76,12 @@ namespace FlightControlWeb.Data
         [JsonPropertyName("timespan_seconds")]
         public double TimespanSeconds
         {
-            get { return this.timespanSeconds; }
+            get { return this.timespan_seconds; }
             set
             {
-                if (this.timespanSeconds != value)
+                if (this.timespan_seconds != value)
                 {
-                    this.timespanSeconds = value;
+                    this.timespan_seconds = value;
                 }
             }
         }
