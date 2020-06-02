@@ -29,10 +29,9 @@ namespace FlightControlWeb.Controllers
 
         // GET: api/FlightPlan
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<FlightPlan>>> GetFlightPlans()
+        public async Task<ActionResult<FlightPlan>> GetFlightPlanWithoudId()
         {
-            return await context.FlightPlans.Include(x => x.InitialLocation)
-                .Include(x => x.Segments).ToListAsync();
+            return await Task.FromResult(BadRequest("Please set Id"));
         }
 
 
@@ -46,7 +45,7 @@ namespace FlightControlWeb.Controllers
                 .Where(x => String.Equals(id, x.Id)).FirstOrDefaultAsync();
             if (flightPlan != null)
             {
-                return flightPlan;
+                return Ok(flightPlan);
             }
             try
             {
@@ -66,7 +65,7 @@ namespace FlightControlWeb.Controllers
             {
                 return NotFound();
             }
-            return flightPlan;
+            return Ok(flightPlan);
         }
 
 
@@ -93,7 +92,7 @@ namespace FlightControlWeb.Controllers
             {
                 throw;
             }
-            return await context.FlightPlans.FindAsync(flightPlan.Id);
+            return CreatedAtAction("GetFlightPlan", new { id = flightPlan.Id }, flightPlan);
         }
     }
 }
