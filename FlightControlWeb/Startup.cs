@@ -12,7 +12,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using FlightControlWeb;
-
+using Microsoft.CodeAnalysis.Options;
 
 namespace FlightControlWeb
 {
@@ -35,6 +35,13 @@ namespace FlightControlWeb
         // Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.AllowAnyOrigin();
+                });
+            });
             services.AddDbContext<FlightsDbContext>(opt => opt.UseInMemoryDatabase("FlightsDb"));
             services.AddControllers();
         }
@@ -50,6 +57,7 @@ namespace FlightControlWeb
 
 
             app.UseRouting();
+            app.UseCors();
 
             app.UseDefaultFiles();
 
