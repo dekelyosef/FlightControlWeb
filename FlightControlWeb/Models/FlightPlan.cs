@@ -16,7 +16,8 @@ namespace FlightControlWeb.Models
         string companyName;
         InitialLocation initialLocation;
         // the all path
-        List<Segment> segments;
+        SegmentList segments;
+        //List<Segment> segments;
 
 
         /**
@@ -29,7 +30,7 @@ namespace FlightControlWeb.Models
          * Constructor with given parameters
          **/
         public FlightPlan(int passengersNum, string company, InitialLocation init,
-            List<Segment> seg)
+            SegmentList seg)
         {
             Id = FlightId.GetRandomId();
             Passengers = passengersNum;
@@ -78,7 +79,7 @@ namespace FlightControlWeb.Models
 
         [JsonProperty("segments")]
         [JsonPropertyName("segments")]
-        public List<Segment> Segments
+        public SegmentList Segments
         {
             get { return this.segments; }
             set { this.segments = value; }
