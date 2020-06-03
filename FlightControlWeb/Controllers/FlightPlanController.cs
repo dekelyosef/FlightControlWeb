@@ -49,13 +49,15 @@ namespace FlightControlWeb.Controllers
             }
             try
             {
-                var server = context.externalServersFlights[id];
+                var server = FlightsDbContext.externalServersFlights[id];
                 if (server == null)
                 {
                     return NotFound();
                 }
-                string path = server.ServerURL + "api/FlightPlan/" + id;
-                flightPlan = FlightPlansManager.GetExternalFlightPlans<FlightPlan>(path);
+                string path = server.ServerURL + "/api/FlightPlan/" + id;
+                //flightPlan = FlightPlansManager.GetExternalFlightPlans<FlightPlan>(path);
+                //flightPlan = FlightPlansManager.GetExternalFlightPlans(path);
+                flightPlan = FlightPlansManager.GetExternalFlightPlan(path);
                 if (flightPlan == null)
                 {
                     return NotFound();
@@ -79,11 +81,6 @@ namespace FlightControlWeb.Controllers
             }
             context.FlightPlans.Add(flightPlan);
             flightPlan.Id = Data.FlightId.GetRandomId();
-            /*            flightPlan.InitialLocation.Id = flightPlan.Id;
-                        foreach (var segment in flightPlan.Segments)
-                        {
-                            segment.Id = flightPlan.Id;
-                        }*/
             context.FlightPlans.Add(flightPlan);
             try
             {

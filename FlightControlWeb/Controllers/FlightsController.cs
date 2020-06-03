@@ -31,7 +31,8 @@ namespace FlightControlWeb.Controllers
         {
             // convert the given current time to UTC
             DateTime time = TimeZoneInfo.ConvertTimeToUtc(relativeTo);
-            context.externalServersFlights.Clear();
+            FlightsDbContext.externalServersFlights.Clear();
+            context.SaveChanges();
             List<Flight> externalFlights = new List<Flight>();
             List<FlightPlan> flightPlans = await context.FlightPlans.Include(x => x.Segments)
                 .Include(x => x.InitialLocation).ToListAsync();
@@ -56,15 +57,14 @@ namespace FlightControlWeb.Controllers
             List<Flight> tmpExternalFlights = new List<Flight>();
             foreach (string path in paths)
             {
-                tmpExternalFlights.AddRange(FlightsManager.GetExternalFlights(time,
-                    path));
+                tmpExternalFlights.AddRange(FlightsManager.GetExternalFlights(time, path));
                 Server server = await context.Servers.Where
                     (x => String.Equals(path, x.ServerURL)).FirstOrDefaultAsync();
                 foreach (Flight flight in tmpExternalFlights)
                 {
                     // update flight as external
                     flight.IsExternal = true;
-                    context.externalServersFlights[flight.Id] = server;
+                    FlightsDbContext.externalServersFlights[flight.Id] = server;
                     // add to all external active flights list
                     externalFlights.Add(flight);
                 }

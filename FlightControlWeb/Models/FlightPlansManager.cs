@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Web;
 using FlightControlWeb.Data;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
-using System.IO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+
 
 namespace FlightControlWeb.Models
 {
@@ -107,26 +108,98 @@ namespace FlightControlWeb.Models
 
 
         /**
-         * Get external flightPlans
+         * Get all active external flights
          **/
-        public static T GetExternalFlightPlans<T>(string url)
+        public static FlightPlan GetExternalFlightPlan(string path)
         {
-            string data = "";
-            WebRequest request = WebRequest.Create(String.Format(url));
-            request.Method = "GET";
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            // get data
-            using (Stream stream = response.GetResponseStream())
-            {
-                StreamReader reader = new StreamReader(stream);
-                data = reader.ReadToEnd();
-                reader.Close();
-            }
-            if (data == "")
+            // get the json string
+            string jsonStr = GetFlightJson(String.Format(path));
+            if (jsonStr == null)
             {
                 return default;
             }
-            return JsonConvert.DeserializeObject<T>(data);
+            return GetFlightsFromExternalServer(jsonStr);
         }
+
+
+        /**
+         * Get all active external flights json
+         **/
+        public static FlightPlan GetFlightsFromExternalServer(string jsonStr)
+        {
+            // handle differences
+            JsonSerializerSettings dezerializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new DefaultContractResolver
+                {
+                    NamingStrategy = new SnakeCaseNamingStrategy()
+                }
+            };
+            return JsonConvert.DeserializeObject<FlightPlan>(jsonStr, dezerializerSettings);
+        }
+
+
+        /**
+         * Get json from given URL path
+         **/
+        public static string GetFlightJson(string serverPath)
+        {
+            WebRequest request = WebRequest.Create((String.Format(serverPath)));
+            request.Method = "GET";
+            // gets a response from the external server
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            // creates a stream object from external API response
+            string jsonStr = "";
+            using (Stream stream = response.GetResponseStream())
+            {
+                StreamReader reader = new StreamReader(stream);
+                jsonStr = reader.ReadToEnd();
+                reader.Close();
+            }
+            if (jsonStr == "")
+            {
+                return null;
+            }
+            return jsonStr;
+        }
+
+
+
+
+
+
+
+        /**
+         * Get external flightPlans
+         **/
+/*        public static FlightPlan GetExternalFlightPlans(string url)
+        {
+            WebRequest request = WebRequest.Create((String.Format(url)));
+            request.Method = "GET";
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            // get data
+            string jsonStr = "";
+            using (Stream stream = response.GetResponseStream())
+            {
+                StreamReader reader = new StreamReader(stream);
+                jsonStr = reader.ReadToEnd();
+                reader.Close();
+            }
+            var deserialSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new DefaultContractResolver
+                {
+                    NamingStrategy = new SnakeCaseNamingStrategy()
+                }
+            };
+            if (jsonStr == "")
+            {
+                return default;
+            }
+            var flightPlan = JsonConvert.DeserializeObject<FlightPlan>(jsonStr, deserialSettings);
+            //return data;
+           // T flightPlan = JsonConvert.DeserializeObject<T>(data);
+            return flightPlan;
+        }*/
     }
 }
