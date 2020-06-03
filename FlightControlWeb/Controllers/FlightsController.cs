@@ -27,7 +27,7 @@ namespace FlightControlWeb.Controllers
 
         // GET: api/Flights
         public async Task<ActionResult<List<Flight>>>
-            GetFlights([FromQuery(Name="relative_to")]DateTime relativeTo)
+            GetFlights([FromQuery(Name = "relative_to")] DateTime relativeTo)
         {
             context.externalServersFlights.Clear();
             List<Flight> externalFlights = new List<Flight>();

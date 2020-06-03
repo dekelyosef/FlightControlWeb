@@ -29,7 +29,7 @@ namespace FlightControlWeb.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Server>>> GetServers()
         {
-           return await context.Servers.ToListAsync();
+            return await context.Servers.ToListAsync();
         }
 
 
