@@ -29,13 +29,15 @@ namespace FlightControlWeb.Controllers
         public async Task<ActionResult<List<Flight>>>
             GetFlights([FromQuery(Name = "relative_to")] DateTime relativeTo)
         {
+            // convert the given current time to UTC
+            DateTime time = TimeZoneInfo.ConvertTimeToUtc(relativeTo);
             context.externalServersFlights.Clear();
             List<Flight> externalFlights = new List<Flight>();
             List<FlightPlan> flightPlans = await context.FlightPlans.Include(x => x.Segments)
                 .Include(x => x.InitialLocation).ToListAsync();
             // new list for all the present flights
             List<Flight> presentFlights =
-                FlightsManager.GetPresentFlights(flightPlans, relativeTo);
+                FlightsManager.GetPresentFlights(flightPlans, time);
             // if only internal flights are happening now
             if (!Request.QueryString.Value.Contains("sync_all"))
             {
@@ -54,7 +56,7 @@ namespace FlightControlWeb.Controllers
             List<Flight> tmpExternalFlights = new List<Flight>();
             foreach (string path in paths)
             {
-                tmpExternalFlights.AddRange(FlightsManager.GetExternalFlights(relativeTo,
+                tmpExternalFlights.AddRange(FlightsManager.GetExternalFlights(time,
                     path));
                 Server server = await context.Servers.Where
                     (x => String.Equals(path, x.ServerURL)).FirstOrDefaultAsync();
