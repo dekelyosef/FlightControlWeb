@@ -79,12 +79,12 @@ namespace FlightControlWeb.Controllers
             }
             context.FlightPlans.Add(flightPlan);
             flightPlan.Id = Data.FlightId.GetRandomId();
-
             /*            flightPlan.InitialLocation.Id = flightPlan.Id;
                         foreach (var segment in flightPlan.Segments)
                         {
                             segment.Id = flightPlan.Id;
                         }*/
+            context.FlightPlans.Add(flightPlan);
             try
             {
                 await context.SaveChangesAsync();

@@ -14,7 +14,7 @@ namespace FlightControlWeb.Data
         string id;
         double longitude;
         double latitude;
-        double timespanSeconds;
+        double timespan_seconds;
 
 
         /**
@@ -33,7 +33,6 @@ namespace FlightControlWeb.Data
             Latitude = lat;
             TimespanSeconds = time;
         }
-
 
         [Key]
 
@@ -80,12 +79,12 @@ namespace FlightControlWeb.Data
         [JsonPropertyName("timespan_seconds")]
         public double TimespanSeconds
         {
-            get { return this.timespanSeconds; }
+            get { return this.timespan_seconds; }
             set
             {
-                if (this.timespanSeconds != value)
+                if (this.timespan_seconds != value)
                 {
-                    this.timespanSeconds = value;
+                    this.timespan_seconds = value;
                 }
             }
         }

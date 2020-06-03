@@ -40,6 +40,8 @@ namespace FlightControlWeb
                 options.AddDefaultPolicy(builder =>
                 {
                     builder.AllowAnyOrigin();
+                    builder.AllowAnyMethod();
+                    builder.AllowAnyHeader();
                 });
             });
             services.AddDbContext<FlightsDbContext>(opt => opt.UseInMemoryDatabase("FlightsDb"));

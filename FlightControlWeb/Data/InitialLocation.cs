@@ -36,7 +36,6 @@ namespace FlightControlWeb.Data
             DateTime = date;
         }
 
-
         [Key]
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
