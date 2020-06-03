@@ -30,12 +30,12 @@ namespace FlightControlWeb.Models
             foreach (FlightPlan flightPlan in flightPlansList)
             {
                 // convert the given current time to UTC
-                DateTime time = TimeZoneInfo.ConvertTimeToUtc(relativeTo);
+                //DateTime time = TimeZoneInfo.ConvertTimeToUtc(relativeTo);
                 // checks if the flight happening now acording to the given time
-                if (IsActive(flightPlan, time))
+                if (IsActive(flightPlan, relativeTo))
                 {
                     // update the new location according to the time that pass
-                    Tuple<double, double> newLocation = GetFlightLocation(flightPlan, time);
+                    Tuple<double, double> newLocation = GetFlightLocation(flightPlan, relativeTo);
                     if (newLocation == null)
                     {
                         continue;
@@ -189,7 +189,7 @@ namespace FlightControlWeb.Models
         {
             // get the active flights from the current connected server
             string request =
-                path + "api/Flights/?relative_to=" + time.ToString("yyyy-MM-ddTHH:mm:ssZ");
+                path + "/api/Flights/?relative_to=" + time.ToString("yyyy-MM-ddTHH:mm:ssZ");
             // get the json string
             string jsonStr = GetFlightJson(String.Format(request));
             if (jsonStr == null)
@@ -222,12 +222,12 @@ namespace FlightControlWeb.Models
          **/
         public static string GetFlightJson(string serverPath)
         {
-            string jsonStr = "";
-            WebRequest request = WebRequest.Create(String.Format(serverPath));
+            WebRequest request = WebRequest.Create((String.Format(serverPath)));
             request.Method = "GET";
             // gets a response from the external server
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
             // creates a stream object from external API response
+            string jsonStr = "";
             using (Stream stream = response.GetResponseStream())
             {
                 StreamReader reader = new StreamReader(stream);
