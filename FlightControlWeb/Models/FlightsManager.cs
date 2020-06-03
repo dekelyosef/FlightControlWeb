@@ -1,6 +1,7 @@
 ﻿using FlightControlWeb.Data;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
@@ -29,8 +30,6 @@ namespace FlightControlWeb.Models
             List<Flight> presentFlights = new List<Flight>();
             foreach (FlightPlan flightPlan in flightPlansList)
             {
-                // convert the given current time to UTC
-                //DateTime time = TimeZoneInfo.ConvertTimeToUtc(relativeTo);
                 // checks if the flight happening now acording to the given time
                 if (IsActive(flightPlan, relativeTo))
                 {
@@ -205,6 +204,14 @@ namespace FlightControlWeb.Models
          **/
         public static List<Flight> GetFlightsFromExternalServer(string jsonStr)
         {
+/*            JArray flightsArray = JArray.Parse(jsonStr);
+            int index = 0;
+            for (; index < flightsArray.Count; index++)
+            {
+                JObject json = JObject.Parse(jsonStr);
+            }*/
+
+
             // handle differences
             JsonSerializerSettings dezerializerSettings = new JsonSerializerSettings
             {

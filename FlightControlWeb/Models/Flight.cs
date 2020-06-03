@@ -18,8 +18,16 @@ namespace FlightControlWeb.Models
         DateTime dateTime;
         bool isExternal;
 
-        public Flight() { }
 
+        /**
+         * Constructor
+         **/
+        public Flight() { }
+        
+
+        /**
+         * Constructor with given flightPlan
+         **/
         public Flight(FlightPlan flightPlan)
         {
             Id = flightPlan.Id;
@@ -31,6 +39,10 @@ namespace FlightControlWeb.Models
             IsExternal = false;
         }
 
+
+        /**
+         * Constructor with given parameters
+         **/
         public Flight(double lon, double lat, int passengersNum, string company,
             DateTime time, bool external)
         {
@@ -43,6 +55,10 @@ namespace FlightControlWeb.Models
             IsExternal = external;
         }
 
+
+        /**
+         * Constructor with given parameters
+         **/
         public Flight(string flightId, double lon, double lat, int passengersNum, string company,
             DateTime time, bool external)
         {
