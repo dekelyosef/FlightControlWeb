@@ -17,8 +17,7 @@ namespace FlightControlWeb.Models
         string companyName;
         InitialLocation initialLocation;
         // the all path
-        SegmentList segments;
-        //List<Segment> segments;
+        List<Segment> segments;
 
 
         /**
@@ -81,7 +80,7 @@ namespace FlightControlWeb.Models
 
         [JsonProperty("segments")]
         [JsonPropertyName("segments")]
-        public SegmentList Segments
+        public List<Segment> Segments
         {
             get { return this.segments; }
             set { this.segments = value; }
