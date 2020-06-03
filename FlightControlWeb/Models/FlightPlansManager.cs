@@ -1,14 +1,16 @@
-﻿using FlightControlWeb.Data;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Web;
+using FlightControlWeb.Data;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 
 namespace FlightControlWeb.Models
@@ -94,10 +96,12 @@ namespace FlightControlWeb.Models
             if (segment.Longitude < -180 || segment.Longitude > 180)
             {
                 return false;
-            } else if (segment.Latitude < -90 || segment.Latitude > 90)
+            }
+            else if (segment.Latitude < -90 || segment.Latitude > 90)
             {
                 return false;
-            } else if (segment.TimespanSeconds < 0)
+            }
+            else if (segment.TimespanSeconds < 0)
             {
                 return false;
             }
@@ -123,21 +127,44 @@ namespace FlightControlWeb.Models
         }
 
 
+        public static Segment convertSegment(JToken segment)
+        {
+            return segment.ToObject<Segment>();
+        }
+
         /**
          * Get all active external flights json
          **/
         public static FlightPlan GetFlightsFromExternalServer(string jsonStr)
         {
             // handle differences
-            JsonSerializerSettings dezerializerSettings = new JsonSerializerSettings
+            JObject json = JObject.Parse(jsonStr);
+            string name = (string)json["company_name"];
+            int passengers = (int)json["passengers"];
+            Array segs = json["segments"].ToArray();
+
+            List<Segment> list = new List<Segment>();
+
+            foreach(JToken j in segs)
             {
-                ContractResolver = new DefaultContractResolver
-                {
-                    NamingStrategy = new SnakeCaseNamingStrategy()
-                }
-            };
-            var f = JsonConvert.DeserializeObject<FlightPlan>(jsonStr, dezerializerSettings);
-            return f;
+                list.Add(convertSegment(j));
+            }
+
+            JToken jLoc = json["initial_location"];
+            double longi = (double)jLoc["longitude"];
+            double lati = (double)jLoc["latitude"];
+            DateTime time = (DateTime)jLoc["date_time"];
+            //DateTime dt = Convert.ToDateTime(time);
+
+            InitialLocation location = new InitialLocation();
+            location.Longitude = longi;
+            location.Latitude = lati;
+            location.DateTime = time;
+
+
+            FlightPlan p = new FlightPlan(passengers, name, location, list);
+
+            return p;
         }
 
 
@@ -146,23 +173,38 @@ namespace FlightControlWeb.Models
          **/
         public static string GetFlightJson(string serverPath)
         {
-            WebRequest request = WebRequest.Create((String.Format(serverPath)));
-            request.Method = "GET";
-            // gets a response from the external server
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            // creates a stream object from external API response
-            string jsonStr = "";
-            using (Stream stream = response.GetResponseStream())
+            HttpWebRequest r = (HttpWebRequest)WebRequest.Create(serverPath);
+            using (HttpWebResponse re = (HttpWebResponse)r.GetResponse())
             {
-                StreamReader reader = new StreamReader(stream);
-                jsonStr = reader.ReadToEnd();
-                reader.Close();
+                using (Stream s = re.GetResponseStream())
+                {
+                    using (StreamReader read = new StreamReader(s))
+                    {
+                        return read.ReadToEnd();
+                    }
+                }
+
             }
-            if (jsonStr == "")
-            {
-                return null;
-            }
-            return jsonStr;
+
+
+
+            //WebRequest request = WebRequest.Create((String.Format(serverPath)));
+            //request.Method = "GET";
+            //// gets a response from the external server
+            //HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            //// creates a stream object from external API response
+            //string jsonStr = "";
+            //using (Stream stream = response.GetResponseStream())
+            //{
+            //    StreamReader reader = new StreamReader(stream);
+            //    jsonStr = reader.ReadToEnd();
+            //    reader.Close();
+            //}
+            //if (jsonStr == "")
+            //{
+            //    return null;
+            //}
+            //return jsonStr;
         }
 
 
@@ -174,34 +216,34 @@ namespace FlightControlWeb.Models
         /**
          * Get external flightPlans
          **/
-/*        public static FlightPlan GetExternalFlightPlans(string url)
-        {
-            WebRequest request = WebRequest.Create((String.Format(url)));
-            request.Method = "GET";
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            // get data
-            string jsonStr = "";
-            using (Stream stream = response.GetResponseStream())
-            {
-                StreamReader reader = new StreamReader(stream);
-                jsonStr = reader.ReadToEnd();
-                reader.Close();
-            }
-            var deserialSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new DefaultContractResolver
+        /*        public static FlightPlan GetExternalFlightPlans(string url)
                 {
-                    NamingStrategy = new SnakeCaseNamingStrategy()
-                }
-            };
-            if (jsonStr == "")
-            {
-                return default;
-            }
-            var flightPlan = JsonConvert.DeserializeObject<FlightPlan>(jsonStr, deserialSettings);
-            //return data;
-           // T flightPlan = JsonConvert.DeserializeObject<T>(data);
-            return flightPlan;
-        }*/
+                    WebRequest request = WebRequest.Create((String.Format(url)));
+                    request.Method = "GET";
+                    HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                    // get data
+                    string jsonStr = "";
+                    using (Stream stream = response.GetResponseStream())
+                    {
+                        StreamReader reader = new StreamReader(stream);
+                        jsonStr = reader.ReadToEnd();
+                        reader.Close();
+                    }
+                    var deserialSettings = new JsonSerializerSettings
+                    {
+                        ContractResolver = new DefaultContractResolver
+                        {
+                            NamingStrategy = new SnakeCaseNamingStrategy()
+                        }
+                    };
+                    if (jsonStr == "")
+                    {
+                        return default;
+                    }
+                    var flightPlan = JsonConvert.DeserializeObject<FlightPlan>(jsonStr, deserialSettings);
+                    //return data;
+                   // T flightPlan = JsonConvert.DeserializeObject<T>(data);
+                    return flightPlan;
+                }*/
     }
 }
