@@ -32,10 +32,10 @@ namespace FlightControlWeb.Models
                 // convert the given current time to UTC
                 DateTime time = TimeZoneInfo.ConvertTimeToUtc(relativeTo);
                 // checks if the flight happening now acording to the given time
-                if (IsActive(flightPlan, time))
+                if (IsActive(flightPlan, relativeTo))
                 {
                     // update the new location according to the time that pass
-                    Tuple<double, double> newLocation = GetFlightLocation(flightPlan, time);
+                    Tuple<double, double> newLocation = GetFlightLocation(flightPlan, relativeTo);
                     if (newLocation == null)
                     {
                         continue;
