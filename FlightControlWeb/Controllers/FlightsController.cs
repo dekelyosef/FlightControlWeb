@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using FlightControlWeb.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace FlightControlWeb.Controllers
 {
@@ -37,8 +36,7 @@ namespace FlightControlWeb.Controllers
             List<FlightPlan> flightPlans = await context.FlightPlans.Include(x => x.Segments)
                 .Include(x => x.InitialLocation).ToListAsync();
             // new list for all the present flights
-            List<Flight> presentFlights =
-                FlightsManager.GetPresentFlights(flightPlans, time);
+            List<Flight> presentFlights = FlightsManager.GetPresentFlights(flightPlans, time);
             // if only internal flights are happening now
             if (!Request.QueryString.Value.Contains("sync_all"))
             {
@@ -47,29 +45,19 @@ namespace FlightControlWeb.Controllers
                     // if the list is empty
                     return NotFound();
                 }
-                else
-                {
-                    return presentFlights;
-                }
+                return presentFlights;
             }
             // otherwise, get the external flights
             List<string> paths = context.Servers.Select(x => x.ServerURL).ToList();
-            List<Flight> tmpExternalFlights = new List<Flight>();
+            List<Flight> tmpFlights = new List<Flight>();
             foreach (string path in paths)
             {
-                tmpExternalFlights.AddRange(FlightsManager.GetExternalFlights(time, path));
+                tmpFlights.AddRange(FlightsManager.GetExternalFlights(time, path));
                 Server server = await context.Servers.Where
                     (x => String.Equals(path, x.ServerURL)).FirstOrDefaultAsync();
-                foreach (Flight flight in tmpExternalFlights)
-                {
-                    // update flight as external
-                    flight.IsExternal = true;
-                    FlightsDbContext.externalServersFlights[flight.Id] = server;
-                    // add to all external active flights list
-                    externalFlights.Add(flight);
-                }
+                externalFlights.AddRange(FlightsManager.SetFlightPlans(tmpFlights, server));
                 // clear the tmp list of specific server
-                tmpExternalFlights.Clear();
+                tmpFlights.Clear();
             }
             presentFlights.AddRange(externalFlights);
             // return a list of all the relevant flights according to the relative time

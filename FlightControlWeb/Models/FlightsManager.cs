@@ -1,14 +1,11 @@
 ﻿using FlightControlWeb.Data;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Web;
 
 namespace FlightControlWeb.Models
 {
@@ -18,6 +15,25 @@ namespace FlightControlWeb.Models
          * Constructor
          **/
         public FlightsManager() { }
+
+
+        /**
+         * Set server flightPlans
+         **/
+        public static List<Flight> SetFlightPlans(List<Flight> tmpExternalFlights, Server server)
+        {
+            List<Flight> externalFlights = new List<Flight>();
+
+            foreach (Flight flight in tmpExternalFlights)
+            {
+                // update flight as external
+                flight.IsExternal = true;
+                FlightsDbContext.externalServersFlights[flight.Id] = server;
+                // add to all external active flights list
+                externalFlights.Add(flight);
+            }
+            return externalFlights;
+        }
 
 
         /**
@@ -204,23 +220,18 @@ namespace FlightControlWeb.Models
          **/
         public static List<Flight> GetFlightsFromExternalServer(string jsonStr)
         {
-/*            JArray flightsArray = JArray.Parse(jsonStr);
+            // new flights list
+            List<Flight> flightsList = new List<Flight>();
+            // get flights array from string
+            JArray flightsArray = JArray.Parse(jsonStr);
             int index = 0;
             for (; index < flightsArray.Count; index++)
             {
-                JObject json = JObject.Parse(jsonStr);
-            }*/
+                // set Flight plan
+                flightsList.Add(flightsArray[index].ToObject<Flight>());
+            }
 
-
-            // handle differences
-            JsonSerializerSettings dezerializerSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new DefaultContractResolver
-                {
-                    NamingStrategy = new SnakeCaseNamingStrategy()
-                }
-            };
-            return JsonConvert.DeserializeObject<List<Flight>>(jsonStr, dezerializerSettings);
+            return flightsList;
         }
 
 

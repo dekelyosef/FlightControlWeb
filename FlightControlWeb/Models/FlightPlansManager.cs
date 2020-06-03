@@ -127,44 +127,44 @@ namespace FlightControlWeb.Models
         }
 
 
-        public static Segment convertSegment(JToken segment)
+        /**
+         * Convert segment
+         **/
+        public static Segment ConvertSegment(JToken segment)
         {
             return segment.ToObject<Segment>();
         }
+
 
         /**
          * Get all active external flights json
          **/
         public static FlightPlan GetFlightsFromExternalServer(string jsonStr)
         {
-            // handle differences
+            // parse json
             JObject json = JObject.Parse(jsonStr);
             string name = (string)json["company_name"];
             int passengers = (int)json["passengers"];
             Array segs = json["segments"].ToArray();
 
             List<Segment> list = new List<Segment>();
-
+            // set segments
             foreach(JToken j in segs)
             {
-                list.Add(convertSegment(j));
+                list.Add(ConvertSegment(j));
             }
 
             JToken jLoc = json["initial_location"];
             double longi = (double)jLoc["longitude"];
             double lati = (double)jLoc["latitude"];
             DateTime time = (DateTime)jLoc["date_time"];
-            //DateTime dt = Convert.ToDateTime(time);
 
             InitialLocation location = new InitialLocation();
             location.Longitude = longi;
             location.Latitude = lati;
             location.DateTime = time;
 
-
-            FlightPlan p = new FlightPlan(passengers, name, location, list);
-
-            return p;
+            return new FlightPlan(passengers, name, location, list);
         }
 
 
@@ -173,77 +173,23 @@ namespace FlightControlWeb.Models
          **/
         public static string GetFlightJson(string serverPath)
         {
-            HttpWebRequest r = (HttpWebRequest)WebRequest.Create(serverPath);
-            using (HttpWebResponse re = (HttpWebResponse)r.GetResponse())
+            WebRequest request = WebRequest.Create((String.Format(serverPath)));
+            request.Method = "GET";
+            // gets a response from the external server
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            // creates a stream object from external API response
+            string jsonStr = "";
+            using (Stream stream = response.GetResponseStream())
             {
-                using (Stream s = re.GetResponseStream())
-                {
-                    using (StreamReader read = new StreamReader(s))
-                    {
-                        return read.ReadToEnd();
-                    }
-                }
-
+                StreamReader reader = new StreamReader(stream);
+                jsonStr = reader.ReadToEnd();
+                reader.Close();
             }
-
-
-
-            //WebRequest request = WebRequest.Create((String.Format(serverPath)));
-            //request.Method = "GET";
-            //// gets a response from the external server
-            //HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            //// creates a stream object from external API response
-            //string jsonStr = "";
-            //using (Stream stream = response.GetResponseStream())
-            //{
-            //    StreamReader reader = new StreamReader(stream);
-            //    jsonStr = reader.ReadToEnd();
-            //    reader.Close();
-            //}
-            //if (jsonStr == "")
-            //{
-            //    return null;
-            //}
-            //return jsonStr;
+            if (jsonStr == "")
+            {
+                return null;
+            }
+            return jsonStr;
         }
-
-
-
-
-
-
-
-        /**
-         * Get external flightPlans
-         **/
-        /*        public static FlightPlan GetExternalFlightPlans(string url)
-                {
-                    WebRequest request = WebRequest.Create((String.Format(url)));
-                    request.Method = "GET";
-                    HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                    // get data
-                    string jsonStr = "";
-                    using (Stream stream = response.GetResponseStream())
-                    {
-                        StreamReader reader = new StreamReader(stream);
-                        jsonStr = reader.ReadToEnd();
-                        reader.Close();
-                    }
-                    var deserialSettings = new JsonSerializerSettings
-                    {
-                        ContractResolver = new DefaultContractResolver
-                        {
-                            NamingStrategy = new SnakeCaseNamingStrategy()
-                        }
-                    };
-                    if (jsonStr == "")
-                    {
-                        return default;
-                    }
-                    var flightPlan = JsonConvert.DeserializeObject<FlightPlan>(jsonStr, deserialSettings);
-                    //return data;
-                   // T flightPlan = JsonConvert.DeserializeObject<T>(data);
-                    return flightPlan;
-                }*/
     }
 }
