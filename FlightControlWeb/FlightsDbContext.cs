@@ -21,7 +21,7 @@ namespace FlightControlWeb
         public DbSet<Server> Servers { get; set; }
 
         // list of flightPlan id with the external server that the flight came from
-        public Dictionary<string, Server> externalServersFlights =
+        public static Dictionary<string, Server> externalServersFlights =
             new Dictionary<string, Server>();
     }
 }
