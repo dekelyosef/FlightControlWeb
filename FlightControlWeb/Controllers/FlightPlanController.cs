@@ -54,7 +54,7 @@ namespace FlightControlWeb.Controllers
                 {
                     return NotFound();
                 }
-                string path = server.ServerURL + "api/FlightPlan/" + id;
+                string path = server.ServerURL + "/api/FlightPlan/" + id;
                 flightPlan = FlightPlansManager.GetExternalFlightPlans<FlightPlan>(path);
                 if (flightPlan == null)
                 {

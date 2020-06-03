@@ -31,7 +31,7 @@ namespace FlightControlWeb.Controllers
         {
             // convert the given current time to UTC
             DateTime time = TimeZoneInfo.ConvertTimeToUtc(relativeTo);
-            context.externalServersFlights.Clear();
+            //context.externalServersFlights.Clear();
             List<Flight> externalFlights = new List<Flight>();
             List<FlightPlan> flightPlans = await context.FlightPlans.Include(x => x.Segments)
                 .Include(x => x.InitialLocation).ToListAsync();

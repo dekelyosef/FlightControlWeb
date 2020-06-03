@@ -144,8 +144,8 @@ namespace FlightControlWeb.Models
             if (index == 0)
             {
                 // initialize the first segment
-                currentSegment = new Segment(flightPlan.Id, flightPlan.InitialLocation.Latitude,
-                    flightPlan.InitialLocation.Longitude, 0);
+                currentSegment = new Segment(flightPlan.Id, 
+                    flightPlan.InitialLocation.Longitude, flightPlan.InitialLocation.Latitude,0);
             }
             else
             {
